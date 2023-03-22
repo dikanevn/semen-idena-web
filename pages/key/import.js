@@ -39,7 +39,7 @@ export default function ImportKey() {
   const {setRestrictedKey} = useApikeyPurchasing()
   const [, {resetRestrictedModal}] = useAppContext()
 
-  const WebCheckerUrl = ``
+  const WebCheckerUrl = `http://95.216.144.197:8080`
 
   const addKey = async () => {
     try {
