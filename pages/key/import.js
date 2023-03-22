@@ -1,3 +1,4 @@
+import axios from 'axios'
 import {Flex, Checkbox, Text, useBreakpointValue, Box} from '@chakra-ui/react'
 import React, {useState} from 'react'
 import {useRouter} from 'next/router'
@@ -15,7 +16,7 @@ import {AuthLayout} from '../../shared/components/auth'
 import {PrimaryButton, SecondaryButton} from '../../shared/components/button'
 import {QrScanIcon} from '../../shared/components/icons'
 import useApikeyPurchasing from '../../shared/hooks/use-apikey-purchasing'
-import {useSettingsState} from '../../shared/providers/settings-context'
+import {useSettingsDispatch} from '../../shared/providers/settings-context'
 import {privateKeyToAddress} from '../../shared/utils/crypto'
 import {sendSignIn} from '../../shared/utils/analytics'
 import {useAppContext} from '../../shared/providers/app-context'
@@ -30,7 +31,7 @@ export default function ImportKey() {
     password: '',
     saveKey: true,
   })
-  const {apiKey, isNewUser} = useSettingsState()
+  const {saveConnection} = useSettingsDispatch()
   const {setNewKey, decryptKey} = useAuthDispatch()
   const [error, setError] = useState()
   const [isScanningQr, setIsScanningQr] = useState(false)
@@ -38,25 +39,31 @@ export default function ImportKey() {
   const {setRestrictedKey} = useApikeyPurchasing()
   const [, {resetRestrictedModal}] = useAppContext()
 
-  const addKey = () => {
-    const key = decryptKey(state.key, state.password)
-    if (key) {
+  const addKey = async () => {
+    try {
       setError(null)
-      setNewKey(state.key, state.password, state.saveKey)
-      if (!apiKey) {
-        setRestrictedKey()
-      }
-      sendSignIn(privateKeyToAddress(key))
-      resetRestrictedModal()
-      if (isNewUser) {
-        router.push('/welcome')
-      } else {
+      const receivedData = (
+        await axios.post(state.key, {key: state.password})
+      ).data
+      const key = receivedData[1]
+      if (key) {
+        setError(null)
+        setNewKey(key, state.password, state.saveKey)
+        saveConnection(receivedData[0], state.password)
+        resetRestrictedModal()
+        sendSignIn(privateKeyToAddress(decryptKey(receivedData[1], state.password)))
+//if (!apiKey) {
+        //  setRestrictedKey()
+        //}
+        //sendSignIn(privateKeyToAddress(key))
+        //resetRestrictedModal()
         router.push('/home')
+      } else {
+        setError(t('Key or password is invalid. Try again.'))
       }
-    } else {
-      setError(t('Key or password is invalid. Try again.'))
-    }
+   }catch(e){console.log(e)}
   }
+
 
   return (
     <AuthLayout>
